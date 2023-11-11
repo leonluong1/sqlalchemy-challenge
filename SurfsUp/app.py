@@ -62,11 +62,11 @@ def home():
         """<h1><b>Welcome to the climate app home page.</b></h1><br/><br/>
 
 <b>List of all available api routes:</b><br/>
-/api/v1.0/precipitation<br/>
-/api/v1.0/stations<br/>
-/api/v1.0/tobs<br/>
-/api/v1.0/&lt;start&gt;<br/>
-/api/v1.0/&lt;start&gt;/&lt;end&gt;<br/>
+<a href=/api/v1.0/precipitation>/api/v1.0/precipitation</a><br/>
+<a href=/api/v1.0/stations>/api/v1.0/stations</a><br/>
+<a href=/api/v1.0/tobs>/api/v1.0/tobs</a><br/>
+/api/v1.0/yyyy-mm-dd<br/>
+/api/v1.0/yyyy-mm-dd/yyyy-mm-dd<br/>
 """
     )
 
@@ -74,8 +74,8 @@ def home():
 @app.route("/api/v1.0/precipitation")
 def get_precipitation():
     year_ago = get_year_ago()
-    year_scores = session.query(measurement.date, func.avg(measurement.prcp))\
-    .filter(measurement.date >= year_ago).group_by(measurement.date)\
+    year_scores = session.query(measurement.date, measurement.prcp)\
+    .filter(measurement.date >= year_ago)\
     .order_by(measurement.date).all()
     return jsonify(dict(year_scores))
 
@@ -99,31 +99,30 @@ def get_most_active_station_tobs():
 
 
 @app.route("/api/v1.0/<start>")
-def get_tob_stats(start):
-    start_date = dt.datetime.strptime(start, "%Y-%m-%d").date()
-    sel = [func.min(measurement.tobs), func.max(measurement.tobs), func.avg(measurement.tobs)]
-    result = session.query(*sel).filter(measurement.date >= start_date).all()
-    result_dict = {
-        "min": result[0][0],
-        "max": result[0][1],
-        "avg": result[0][2]
-    }
-    return jsonify(result_dict)
-
-
 @app.route("/api/v1.0/<start>/<end>")
-def get_tob_stats2(start, end):
+def get_tob_stats(start=None, end=None):
     start_date = dt.datetime.strptime(start, "%Y-%m-%d").date()
-    end_date = dt.datetime.strptime(end, "%Y-%m-%d").date()
     sel = [func.min(measurement.tobs), func.max(measurement.tobs), func.avg(measurement.tobs)]
+    
+    if not end:
+        result = session.query(*sel).filter(measurement.date >= start_date).all()
+        result_dict = {
+            "min": result[0][0],
+            "max": result[0][1],
+            "avg": result[0][2]
+        }
+        return jsonify(result_dict)
+
+    end_date = dt.datetime.strptime(end, "%Y-%m-%d").date()
     result = session.query(*sel).filter(measurement.date >= start_date)\
-        .filter(measurement.date <= end_date).all()
+    .filter(measurement.date <= end_date).all()
     result_dict = {
         "min": result[0][0],
         "max": result[0][1],
         "avg": result[0][2]
     }
     return jsonify(result_dict)
+    
 
 
 if __name__ == '__main__':
