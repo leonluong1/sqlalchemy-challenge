@@ -1,5 +1,5 @@
 # Hawaii Climate Analysis App
-Module 11 SQLAlchemy Challenge -- Berkeley Data Analytics Boot Camp
+Module 10 SQLAlchemy Challenge -- Berkeley Data Analytics Boot Camp
 
 This project is about examining weather observations from nine different weather stations including temperature and precipitation.
 We have a python notebook that contains starter code for the climate app.
